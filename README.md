@@ -4,12 +4,7 @@
 An application to bring together NGOs and volunteers for food donation.
 Collaboratively built with a UI/UX Designer, using ReactJS, Styled-JSX, ExpressJS, and MongoDB.
 
-## Team Members
 
- - [Mansi Sindhu](https://github.com/mansisindhu)
- - [Rohit Kumar ](https://github.com/rht16)
- - [Shashi Kumar](https://github.com/Shashi-kr-github)
- - [Shantanu Pathak](https://github.com/Wingsrt)
 
 ## Features
  - User can select various types of NGO for food donation.
