@@ -1,9 +1,7 @@
-import styles from "./signup.module.css";
-import { BsFacebook } from "react-icons/bs";
-import { FcGoogle } from "react-icons/fc";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
+import styles from "./signup.module.css";
 
 const Signup = () => {
   const history = useHistory();
@@ -11,31 +9,27 @@ const Signup = () => {
     name: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [socialLoading, setSocialLoading] = useState({ google: false, facebook: false });
+  const [socialLoading, setSocialLoading] = useState({
+    google: false,
+    facebook: false,
+  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    setError("");
     setIsLoading(true);
-
-    // Basic validation
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-      setError("All fields are required");
-      setIsLoading(false);
-      return;
-    }
+    setError("");
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
@@ -52,18 +46,19 @@ const Signup = () => {
     try {
       // Attempt to sign up with backend
       const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/signup`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/auth/register`,
         {
           name: formData.name,
           email: formData.email,
-          password: formData.password
-        },
-        {
-          withCredentials: true
+          password: formData.password,
+          phone: "1234567890", // Default phone number
+          role: "donor"
         }
       );
 
-      if (response.data.success) {
+      if (response.data.token) {
+        // Store the token
+        localStorage.setItem('token', response.data.token);
         // Navigate to home page after successful signup
         history.push("/");
         window.location.reload(); // Reload to update user state
@@ -85,8 +80,9 @@ const Signup = () => {
     setError("");
     
     try {
-      // Redirect to Google OAuth
-      window.location.href = `${process.env.REACT_APP_BACKEND_URL}/auth/google`;
+      // For now, just show a message
+      setError("Google login not implemented yet");
+      setSocialLoading(prev => ({ ...prev, google: false }));
     } catch (err) {
       console.error("Google login error:", err);
       setError("Google login failed. Please try again.");
@@ -99,8 +95,9 @@ const Signup = () => {
     setError("");
     
     try {
-      // Redirect to Facebook OAuth
-      window.location.href = `${process.env.REACT_APP_BACKEND_URL}/auth/facebook`;
+      // For now, just show a message
+      setError("Facebook login not implemented yet");
+      setSocialLoading(prev => ({ ...prev, facebook: false }));
     } catch (err) {
       console.error("Facebook login error:", err);
       setError("Facebook login failed. Please try again.");
@@ -147,37 +144,29 @@ const Signup = () => {
         {error && <p className={styles.error}>{error}</p>}
         <button 
           type="submit" 
-          className={styles.signup_btn}
           disabled={isLoading}
+          className={styles.submitButton}
         >
           {isLoading ? "Signing up..." : "Sign up"}
         </button>
       </form>
 
-      <div className={styles.or}>
-        <div className={styles.number}>
-          <p>or</p>
-        </div>
-      </div>
-
-      <div className={styles.lower}>
-        <p className={styles.signUpWith}>Sign up with</p>
-        <div 
-          onClick={handleGoogleLogin} 
-          className={`${styles.google} ${socialLoading.google ? styles.loading : ''}`}
-          style={{ opacity: socialLoading.google ? 0.7 : 1 }}
+      <div className={styles.socialLogin}>
+        <p>Or sign up with:</p>
+        <button
+          onClick={handleGoogleLogin}
+          disabled={socialLoading.google}
+          className={styles.googleButton}
         >
-          <FcGoogle className={styles.iconGoogle} />
-          <p>{socialLoading.google ? "Connecting..." : "Login with Google"}</p>
-        </div>
-        <div 
-          onClick={handleFacebookLogin} 
-          className={`${styles.google} ${socialLoading.facebook ? styles.loading : ''}`}
-          style={{ opacity: socialLoading.facebook ? 0.7 : 1 }}
+          {socialLoading.google ? "Loading..." : "Google"}
+        </button>
+        <button
+          onClick={handleFacebookLogin}
+          disabled={socialLoading.facebook}
+          className={styles.facebookButton}
         >
-          <BsFacebook className={styles.iconFb} />
-          <p>{socialLoading.facebook ? "Connecting..." : "Login with Facebook"}</p>
-        </div>
+          {socialLoading.facebook ? "Loading..." : "Facebook"}
+        </button>
       </div>
     </div>
   );

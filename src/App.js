@@ -24,7 +24,7 @@ function App() {
   const getNgoData = async () => {
     try {
       const { data } = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/ngos`
+        `${process.env.REACT_APP_BACKEND_URL}/api/ngos`
       );
       setData([...data]);
     } catch (err) {
@@ -37,9 +37,11 @@ function App() {
   const getUser = async () => {
     try {
       const { data } = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/user`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/auth/me`,
         {
-          withCredentials: true,
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
         }
       );
       setUser({ isFetched: true, user: data.user });
@@ -74,9 +76,7 @@ function App() {
   };
 
   const logout = async () => {
-    await axios.get(`${process.env.REACT_APP_BACKEND_URL}/logout`, {
-      withCredentials: true,
-    });
+    localStorage.removeItem('token');
     setUser({ user: null, isFetched: true });
   };
 
@@ -119,16 +119,16 @@ function App() {
           <DeliverSelection />
         </Route>
 
-        <Route path="/chooseRole" exact>
-          <ChooseRole />
-        </Route>
-
-        <Route path="/donationType" exact>
+        <Route path="/donation" exact>
           <DonationSelection />
         </Route>
 
-        <Route path="/confirmFoodDetails" exact>
+        <Route path="/confirm" exact>
           <ConfirmFoodDetails foodData={foodData} />
+        </Route>
+
+        <Route path="/role" exact>
+          <ChooseRole />
         </Route>
       </Switch>
     </div>
