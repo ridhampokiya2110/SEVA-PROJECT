@@ -13,10 +13,6 @@ const Signup = () => {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [socialLoading, setSocialLoading] = useState({
-    google: false,
-    facebook: false,
-  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -59,9 +55,12 @@ const Signup = () => {
       if (response.data.token) {
         // Store the token
         localStorage.setItem('token', response.data.token);
-        // Navigate to home page after successful signup
-        history.push("/");
-        window.location.reload(); // Reload to update user state
+        
+        // Show success message
+        alert('Account created successfully! Welcome to Seva.');
+        
+        // Force page reload to update user state
+        window.location.href = '/';
       }
     } catch (err) {
       console.error("Signup error:", err);
@@ -75,98 +74,93 @@ const Signup = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setSocialLoading(prev => ({ ...prev, google: true }));
-    setError("");
-    
-    try {
-      // For now, just show a message
-      setError("Google login not implemented yet");
-      setSocialLoading(prev => ({ ...prev, google: false }));
-    } catch (err) {
-      console.error("Google login error:", err);
-      setError("Google login failed. Please try again.");
-      setSocialLoading(prev => ({ ...prev, google: false }));
-    }
-  };
-
-  const handleFacebookLogin = async () => {
-    setSocialLoading(prev => ({ ...prev, facebook: true }));
-    setError("");
-    
-    try {
-      // For now, just show a message
-      setError("Facebook login not implemented yet");
-      setSocialLoading(prev => ({ ...prev, facebook: false }));
-    } catch (err) {
-      console.error("Facebook login error:", err);
-      setError("Facebook login failed. Please try again.");
-      setSocialLoading(prev => ({ ...prev, facebook: false }));
-    }
-  };
-
   return (
     <div className={styles.main}>
-      <h1>Sign up</h1>
-      <form className={styles.form} onSubmit={handleSignup}>
-        <input 
-          type="text" 
-          id="name" 
-          name="name" 
-          placeholder="Name" 
-          value={formData.name}
-          onChange={handleInputChange}
-        />
-        <input
-          type="email"
-          id="email"
-          name="email"
-          placeholder="Email Address "
-          value={formData.email}
-          onChange={handleInputChange}
-        />
-        <input
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleInputChange}
-        />
-        <input
-          type="password"
-          id="confirmPassword"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          value={formData.confirmPassword}
-          onChange={handleInputChange}
-        />
-        {error && <p className={styles.error}>{error}</p>}
-        <button 
-          type="submit" 
-          disabled={isLoading}
-          className={styles.submitButton}
-        >
-          {isLoading ? "Signing up..." : "Sign up"}
-        </button>
-      </form>
-
-      <div className={styles.socialLogin}>
-        <p>Or sign up with:</p>
-        <button
-          onClick={handleGoogleLogin}
-          disabled={socialLoading.google}
-          className={styles.googleButton}
-        >
-          {socialLoading.google ? "Loading..." : "Google"}
-        </button>
-        <button
-          onClick={handleFacebookLogin}
-          disabled={socialLoading.facebook}
-          className={styles.facebookButton}
-        >
-          {socialLoading.facebook ? "Loading..." : "Facebook"}
-        </button>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Join Seva</h1>
+          <p className={styles.subtitle}>Start making a difference today</p>
+        </div>
+        
+        <form className={styles.form} onSubmit={handleSignup}>
+          <div className={styles.inputGroup}>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              placeholder="Full Name" 
+              value={formData.name}
+              onChange={handleInputChange}
+              className={styles.input}
+              required
+            />
+          </div>
+          
+          <div className={styles.inputGroup}>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Email Address"
+              value={formData.email}
+              onChange={handleInputChange}
+              className={styles.input}
+              required
+            />
+          </div>
+          
+          <div className={styles.inputGroup}>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleInputChange}
+              className={styles.input}
+              required
+            />
+          </div>
+          
+          <div className={styles.inputGroup}>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              className={styles.input}
+              required
+            />
+          </div>
+          
+          {error && <p className={styles.error}>{error}</p>}
+          
+          <button 
+            type="submit" 
+            disabled={isLoading}
+            className={styles.signupButton}
+          >
+            <span className={styles.buttonText}>
+              {isLoading ? "Creating Account..." : "Create Account"}
+            </span>
+            <div className={styles.buttonIcon}>
+              {isLoading ? (
+                <div className={styles.spinner}></div>
+              ) : (
+                <span className={styles.arrow}>→</span>
+              )}
+            </div>
+          </button>
+        </form>
+        
+        <div className={styles.footer}>
+          <p className={styles.loginText}>
+            Already have an account? 
+            <span className={styles.loginLink}> Sign in here</span>
+          </p>
+        </div>
       </div>
     </div>
   );

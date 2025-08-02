@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const supabase = require('./config/supabase');
 
 const app = express();
 
@@ -25,73 +24,72 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-// Get NGOs from Supabase
-app.get('/api/ngos', async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('ngos')
-      .select('*')
-      .eq('is_active', true);
-
-    if (error) {
-      console.error('Supabase error:', error);
-      return res.status(500).json({ message: 'Database error' });
+// Mock NGO data
+app.get('/api/ngos', (req, res) => {
+  res.json([
+    {
+      id: '1',
+      name: 'Hope Orphanage',
+      description: 'Providing care for orphaned children',
+      category: 'orphanage',
+      address: {
+        street: '123 Hope St',
+        city: 'Mumbai',
+        state: 'Maharashtra'
+      },
+      contact: {
+        phone: '+91-1234567890',
+        email: 'hope@example.com'
+      }
+    },
+    {
+      id: '2', 
+      name: 'Elder Care Home',
+      description: 'Caring for elderly citizens',
+      category: 'old-age-home',
+      address: {
+        street: '456 Care Ave',
+        city: 'Delhi',
+        state: 'Delhi'
+      },
+      contact: {
+        phone: '+91-9876543210',
+        email: 'elder@example.com'
+      }
     }
-
-    res.json(data || []);
-  } catch (error) {
-    console.error('Server error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
+  ]);
 });
 
-// Register user
-app.post('/api/auth/register', async (req, res) => {
+// Register user (mock implementation)
+app.post('/api/auth/register', (req, res) => {
   try {
     const { name, email, password, phone, role } = req.body;
 
-    // Check if user already exists
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single();
-
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists with this email' });
+    // Simple validation
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Name, email, and password are required' });
     }
 
-    // Create new user
-    const { data: user, error } = await supabase
-      .from('users')
-      .insert([
-        {
-          name,
-          email,
-          password, // In production, hash this password
-          phone,
-          role: role || 'donor'
-        }
-      ])
-      .select()
-      .single();
+    // Mock user creation
+    const mockUser = {
+      id: Date.now().toString(),
+      name,
+      email,
+      role: role || 'donor',
+      phone: phone || '1234567890'
+    };
 
-    if (error) {
-      console.error('Supabase error:', error);
-      return res.status(500).json({ message: 'Registration failed' });
-    }
-
-    // Generate simple token (in production, use JWT)
-    const token = `token_${user.id}_${Date.now()}`;
+    // Generate simple token
+    const token = `token_${mockUser.id}_${Date.now()}`;
 
     res.status(201).json({
       message: 'User registered successfully',
       token,
       user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
+        id: mockUser.id,
+        name: mockUser.name,
+        email: mockUser.email,
+        role: mockUser.role
       }
     });
   } catch (error) {
@@ -100,8 +98,8 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-// Get current user
-app.get('/api/auth/me', async (req, res) => {
+// Get current user (mock implementation)
+app.get('/api/auth/me', (req, res) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
     
@@ -112,17 +110,15 @@ app.get('/api/auth/me', async (req, res) => {
     // Extract user ID from token (simple implementation)
     const userId = token.split('_')[1];
     
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('id, name, email, role')
-      .eq('id', userId)
-      .single();
+    // Mock user data
+    const mockUser = {
+      id: userId,
+      name: 'Test User',
+      email: 'test@example.com',
+      role: 'donor'
+    };
 
-    if (error || !user) {
-      return res.status(401).json({ message: 'Invalid token' });
-    }
-
-    res.json({ user });
+    res.json({ user: mockUser });
   } catch (error) {
     console.error('Server error:', error);
     res.status(500).json({ message: 'Server error' });

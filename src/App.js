@@ -20,6 +20,8 @@ import axios from "axios";
 
 function App() {
   const [ngoData, setData] = useState(null);
+  const [userData, setUser] = useState({ isFetched: false, user: null });
+  const [isLoad, setLoad] = useState(true);
 
   const getNgoData = async () => {
     try {
@@ -32,20 +34,26 @@ function App() {
     }
   };
 
-  const [userData, setUser] = useState({ isFetched: false, user: null });
-
   const getUser = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setUser({ isFetched: true, user: null });
+        return;
+      }
+
       const { data } = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/auth/me`,
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${token}`
           }
         }
       );
       setUser({ isFetched: true, user: data.user });
     } catch (err) {
+      console.log('Auth error:', err);
+      localStorage.removeItem('token'); // Clear invalid token
       setUser({ isFetched: true, user: null });
     }
   };
@@ -55,12 +63,11 @@ function App() {
     getUser();
   }, []);
 
-  const [isLoad, setLoad] = useState(true);
-
   useEffect(() => {
-    setInterval(() => {
+    const timer = setTimeout(() => {
       setLoad(false);
     }, 3000);
+    return () => clearTimeout(timer);
   }, []);
 
   const [foodData, setFoodData] = useState({ type: "", meal: "", quantity: 0 });
@@ -80,14 +87,27 @@ function App() {
     setUser({ user: null, isFetched: true });
   };
 
+  // Show loading while checking user state
   if (!userData.isFetched) {
-    return <p>Loading...</p>;
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '18px'
+      }}>
+        Loading...
+      </div>
+    );
   }
 
+  // Show signup/login if no user
   if (userData.isFetched && !userData.user) {
     return <div className="App">{isLoad ? <FirstPage /> : <Signup />}</div>;
   }
 
+  // Show main app if user is logged in
   return (
     <div className="App">
       <Switch>
